@@ -119,13 +119,16 @@ unsigned char *julia_rgb(int w, int h, float xl, float xr, float yb, float yt)
   int j, i, k;
   unsigned char *rgb;
   rgb = (unsigned char *)malloc(w * h * 3 * sizeof(unsigned char));
-
+/*Setting the parallel region for each loop, each one will have the private variables (i,j,k)
+and also using dynamic scheduling to distribute the work through the loops. */ 
 #pragma omp parallel for private(i, j, k) schedule(dynamic) 
   for (j = 0; j < h; ++j)
   {
     for (i = 0; i < w; ++i)
     {
       int juliaValue = julia_point(w, h, xl, xr, yb, yt, i, j);
+
+      // Calculate the index k in the rgb array for the current pixel (i,j)
       k = (j * w + i) * 3; 
       rgb[k] = 255 * (1 - juliaValue);
       rgb[k + 1] = 255 * (1 - juliaValue);
